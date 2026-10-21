@@ -4,172 +4,277 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vansh | F1 Portfolio</title>
-  <!-- Google Fonts -->
+  <title>Vansh Thacker | Software Engineer</title>
+  <meta name="description" content="Vansh Thacker: Computer Science student at the University of Strathclyde, GDSC Technical Lead and hackathon runner-up." />
+  <meta name="theme-color" content="#0b0b10" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap"
     rel="stylesheet">
-
   <link rel="stylesheet" href="style.css" />
+  <script>
+    document.documentElement.classList.add('js');
+    try { if (sessionStorage.getItem('introSeen')) document.documentElement.classList.add('intro-seen'); } catch (e) {}
+  </script>
+
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+  </script>
 </head>
 
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#about">About Me</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#contact">Contact Details</a></li>
-      </ul>
+<body class="home">
+  <!-- 3D scene: a fixed canvas behind the page. The car drives one lap as you scroll. -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scene-scrim" aria-hidden="true"></div>
+
+  <!-- Start lights intro -->
+  <div class="start-lights" id="start-lights" aria-hidden="true">
+    <div class="lights-row">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p class="lights-label mono">Lights out and away we go</p>
+  </div>
+
+  <header class="site-header">
+    <a href="#home" class="brand" aria-label="Vansh Thacker, home">
+      <span class="brand-mark">VT</span>
+      <span class="brand-name">Vansh Thacker</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+      <span></span><span></span>
+    </button>
+    <nav id="site-nav" class="site-nav">
+      <a href="#about" data-section="about">About</a>
+      <a href="#education" data-section="education stem sainsburys desi gdsc events">Career</a>
+      <a href="#banking" data-section="banking duck-run zero-hour skills">Projects</a>
+      <a href="#contact" class="nav-cta" data-section="contact">Contact</a>
     </nav>
   </header>
 
-<section id="home" class="hero">
-  <video autoplay muted loop playsinline class="hero-video">
-    <source src="ferrari.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div class="video-overlay"></div>
-
-  <div class="hero-content">
-    <h1 data-text="FULL THROTTLE">
-      <span class="glitch">VANSH THACKER</span>
-    </h1>
-    <p>Computer Science Undergraduate | AI Enthusiast & Technical Developer</p>
-    <a href="#about" class="cta-btn">Lights Out & Away We Go</a>
-  </div>
-</section>
-
-  <section id="about" class="grid-section telemetry-about">
-  <div class="about-container">
-    <h2 class="section-title">ABOUT ME</h2>
-    <div class="content-wrapper">
-    <p class="about-p">
-        I am a <strong>Computer Science undergraduate at the University of Strathclyde</strong>, currently in my second year of development. I am driven by a deep enthusiasm for <strong>Artificial Intelligence</strong> and its transformative impact on the global landscape.
-      </p>
-      <p class="about-p">
-        Beyond the codebase, my experience has taught me that high-performance systems require more than just logic. I have honed my ability to <strong>collaborate in multidisciplinary teams</strong>, understanding that <strong>leadership</strong> and <strong>Agile methodologies</strong> are the fuel that drives a project from the drawing board to the finish line.
-      </p>
+  <!-- Lap telemetry HUD -->
+  <aside class="hud" aria-hidden="true">
+    <div class="hud-row">
+      <span class="hud-label">Turn</span>
+      <span class="hud-value" id="hud-sector">GRID</span>
     </div>
-    <div class="red-accent-bar"></div>
-  </div>
-  </section>
-  <section id="projects" class="grid-section">
-    <h2 class="section-title">PROJECTS</h2>
-    <div class="card">
-    <h3>CAREER PREDICTOR APP</h3>
-    <p>Predicts career paths based on user input using data-driven insights.</p>
-  
-    <div class="project-badges">
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> Python</span>
-    <span class="badge"><i class="fa-solid fa-database"></i> SQL</span>
-    <span class="badge"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+    <div class="hud-row">
+      <span class="hud-label">Speed</span>
+      <span class="hud-value"><span id="hud-speed">0</span><small> km/h</small></span>
     </div>
-
-  <a href="projects/career-predictor.html" class="cta-btn project-btn">View Full Specs</a>
-</div>
-      <div class="card">
-        <h3>Portfolio Website</h3>
-        <p>Portfolio Website based on an F1 theme</p>
-         <div class="project-badges">
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> HTML</span>
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> CSS</span>
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> JavaScript</span>
+    <div class="hud-lap">
+      <div class="hud-lap-fill" id="hud-lap"></div>
     </div>
-    <a href="projects/portfolio-project.html" class="cta-btn project-btn">View Full Specs</a>
-    
-      </div>
-      
-    </div>
-  </section>
-  
-  
-<section id="experience" class="grid-section experience-track-container">
-    <h2 class="section-title">CAREER CIRCUIT</h2>
-    
-    <div class="track-wrapper">
-      <svg class="track-svg" viewBox="0 -50 1500 400" preserveAspectRatio="xMidYMid meet">
-    <path id="race-path" d="M0,200 C150,200 300,50 450,200 S750,350 900,200 S1200,50 1500,200" 
-          fill="none" stroke="#333" stroke-width="12" stroke-linecap="round" />
-    
-    <g id="car-marker">
-        <rect x="-20" y="-7" width="40" height="14" rx="3" fill="var(--f1-red)" />
-        <rect x="-22" y="-8" width="5" height="16" fill="#000" /> <circle cx="-12" cy="-9" r="4" fill="#222" />
-        <circle cx="-12" cy="9" r="4" fill="#222" />
-        <circle cx="12" cy="-9" r="4" fill="#222" />
-        <circle cx="12" cy="9" r="4" fill="#222" />
-    </g>
-    </svg>
+  </aside>
 
-        <div class="track-milestones">
-            <div class="milestone" style="left: 15%; top: 40%;">
-                <div class="milestone-content">
-                    <h3>CAMPUS AMBASSADOR: JAN 2026-PRESENT</h3>
-                    <p>Representing the university to promote higher education</p>
-                </div>
-            </div>
-            
-            
-            <div class="milestone" style="left: 50%; top: 55%;">
-                <div class="milestone-content">
-                    <h3>REGISTRATION AND WELCOME GUIDE: SEP 2025 - OCTOBER 2025</h3>
-                    <p>Helped students with their registration process at uni</p>
-                </div>
-            </div>
-
-            <div class="milestone" style="left: 85%; top: 25%;">
-                <div class="milestone-content">
-                    <h3>OPEN DAY HELPER : SEP 2025 - OCTOBER 2025</h3>
-                    <p>Helped university to organize a successful open day for prospective students.</p>
-                </div>
-
-      
-            
-                
-            </div>
-        </div>
-    </div>
-</section>
-
-  <section id="contact" class="contact-footer">
-  <div class="contact-container">
-    <h2 class="section-title">GET IN TOUCH</h2>
-    <p class="contact-description">Ready to upgrade your team's aerodynamics?</p>
-
-    <div class="contact-columns">
-      <div class="contact-item">
-        <h3 class="contact-label">ADDRESS</h3>
-        <p>Glasgow,<br>Scotland, United Kingdom</p>
-      </div>
-
-      <div class="contact-item">
-        <h3 class="contact-label">SOCIAL</h3>
-        <div class="social-links">
-          <a href="https://github.com/KILLSWITCHER07" target="_blank" aria-label="GitHub">
-            <i class="fa-brands fa-github"></i>
-          </a>
-          <a href="https://www.linkedin.com/in/vansh-thacker/" target="_blank" aria-label="LinkedIn">
-            <i class="fa-brands fa-linkedin-in"></i>
-          </a>
+  <main>
+    <!-- Each section is a stop on the lap. data-u is the position on the track (0-1),
+         data-cam the side the camera parks on, data-frame where the car sits on screen
+         (-1 right, 1 left). data-kind is "flag" (a marshal flag in data-flag colour)
+         or "pit" (the car pulls into a pit box); data-num/title/sub/date are printed on it. -->
+    <section id="home" class="hero section stop" data-u="0" data-cam="1" data-frame="-1.5" data-sector="GRID">
+      <div class="hero-inner">
+        <p class="eyebrow mono"><span class="dot"></span> Software Engineer · BSc Computer Science, Strathclyde</p>
+        <h1 class="hero-title">
+          <span>Vansh</span>
+          <span class="accent">Thacker</span>
+        </h1>
+        <p class="hero-lead">
+          Computer Science student on a first-class track, GDSC Technical Lead and hackathon runner-up.
+          Scroll to race my career: flags mark milestones, pit stops mark work experience.
+        </p>
+        <div class="hero-actions">
+          <a href="#about" class="btn btn-primary">Lights out</a>
+          <a href="#contact" class="btn btn-ghost">Get in touch</a>
         </div>
       </div>
+      <a href="#about" class="scroll-cue mono" aria-label="Scroll to About">
+        <span>Scroll to race</span>
+        <i></i>
+      </a>
+    </section>
 
-      <div class="contact-item">
-        <h3 class="contact-label">EMAIL</h3>
-        <a href="mailto:vansh.thacker06@gmail.com" class="email-address">vansh.thacker06@gmail.com</a>
+    <section id="about" class="section section-right stop" data-u="0.06" data-cam="-1" data-frame="1" data-sector="T1 · ABOUT" data-kind="flag" data-num="01" data-title="Driver profile" data-sub="Software engineering · Testing · APIs" data-flag="green">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Green flag · Driver profile</p>
+        <h2 class="section-title">About me</h2>
+        <p>
+          I'm a <strong>Computer Science student at the University of Strathclyde</strong> in my penultimate year,
+          tracking a <strong>first-class degree</strong>. I build backend systems, real-time multiplayer servers
+          and the test suites that keep them honest.
+        </p>
+        <p>
+          Outside the editor I lead workshops for 150+ students at <strong>GDSC</strong>, compete at hackathons,
+          and play competitive volleyball for the university.
+        </p>
+        <dl class="facts">
+          <div><dt>Based in</dt><dd>Glasgow, UK</dd></div>
+          <div><dt>Degree</dt><dd>BSc (Hons) CS · 74%</dd></div>
+          <div><dt>Focus</dt><dd>Backend, testing, APIs</dd></div>
+          <div><dt>Currently</dt><dd>GDSC Technical Lead</dd></div>
+        </dl>
       </div>
-    </div>
-  </div>
+    </section>
 
+    <section id="education" class="section section-left stop" data-u="0.14" data-cam="1" data-frame="-1" data-sector="T2 · EDUCATION" data-kind="flag" data-num="02" data-title="University of Strathclyde" data-sub="BSc (Hons) Computer Science · 74%" data-date="Sept 2024 – May 2028" data-flag="purple">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Purple flag · Education</p>
+        <h2 class="section-title">University of Strathclyde</h2>
+        <p class="milestone-meta mono">BSc (Hons) Computer Science · Sept 2024 – May 2028</p>
+        <ul class="points">
+          <li>Penultimate year on a <strong>first-class track</strong> with a 74% aggregate.</li>
+          <li>Core focus: software engineering, data structures, algorithms and backend architecture.</li>
+        </ul>
+      </div>
+    </section>
 
-  <footer>
-    <p>&copy; 2026 Vansh Portfolio.</p>
+    <section id="stem" class="section section-right stop" data-u="0.22" data-cam="-1" data-frame="1" data-sector="T3 · STEM AMBASSADOR" data-kind="flag" data-num="03" data-title="STEM Ambassador" data-sub="University of Strathclyde" data-date="Sept 2024 – Present" data-flag="blue">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Blue flag · Ambassador</p>
+        <h2 class="section-title">STEM Ambassador</h2>
+        <p class="milestone-meta mono">University of Strathclyde · Sept 2024 – Present</p>
+        <ul class="points">
+          <li>Mentor incoming students and deliver STEM outreach.</li>
+          <li>Communicate complex technical topics to non-technical audiences.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="sainsburys" class="section section-left stop" data-u="0.31" data-cam="1" data-frame="-1" data-sector="PIT · SAINSBURY’S" data-kind="pit" data-num="PIT 1" data-title="Trading Assistant" data-sub="Sainsbury’s Supermarkets Ltd · Glasgow" data-date="Oct 2025 – Present">
+      <div class="panel panel-pit reveal">
+        <p class="section-kicker mono">Pit stop 01 · Work experience</p>
+        <h2 class="section-title">Sainsbury’s</h2>
+        <p class="milestone-meta mono">Trading Assistant (part-time weekends) · Oct 2025 – Present</p>
+        <ul class="points">
+          <li>Maintain accurate stock levels within time-critical trading windows.</li>
+          <li>Balance the role alongside a full-time degree and GDSC leadership.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="desi" class="section section-right stop" data-u="0.4" data-cam="-1" data-frame="1" data-sector="T4 · DESI SOCIETY" data-kind="flag" data-num="04" data-title="Event Executive" data-sub="Strathclyde DESI Society" data-date="Sept 2025 – Sept 2026" data-flag="yellow">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Yellow flag · Leadership</p>
+        <h2 class="section-title">DESI Society Event Executive</h2>
+        <p class="milestone-meta mono">Strathclyde DESI Society · Sept 2025 – Sept 2026</p>
+        <ul class="points">
+          <li>Directed logistics, planning and digital ticketing for a <strong>300+ guest</strong> cultural event.</li>
+          <li>Redesigned the entry flow on the spot to clear a ticketing bottleneck.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="banking" class="section section-left stop" data-u="0.48" data-cam="1" data-frame="-1" data-sector="T5 · PROJECT" data-kind="flag" data-num="05" data-title="Banking Portfolio Platform" data-sub="Java · SQL · REST APIs" data-date="Project" data-flag="white">
+      <div class="panel reveal">
+        <p class="section-kicker mono">White flag · Project</p>
+        <h2 class="section-title">Banking Portfolio Platform</h2>
+        <p class="milestone-meta mono">Java · SQL · REST APIs</p>
+        <ul class="points">
+          <li>Built a secure Java backend for a simulated banking application, exposed through REST APIs.</li>
+          <li>Designed the SQL schema and integrated core banking logic to preserve transactional integrity.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="duck-run" class="section section-right stop" data-u="0.56" data-cam="-1" data-frame="1" data-sector="T6 · DUCK RUN" data-kind="flag" data-num="06" data-title="Duck Run" data-sub="JPMorgan Chase Challenge · GUTech Hack" data-date="Live" data-flag="green">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Green flag · Hackathon</p>
+        <h2 class="section-title">Duck Run</h2>
+        <p class="milestone-meta mono">JPMorgan Chase Challenge · GUTech Hack · TypeScript, Three.js, Supabase, Vitest</p>
+        <ul class="points">
+          <li>Owned testing for a five-person team’s 3D multiplayer browser game: <strong>150+ Vitest unit tests</strong>.</li>
+          <li>End-to-end and cross-browser QA across desktop and mobile before the final demo.</li>
+          <li>Procedurally synthesised audio with the Web Audio API and adaptive render quality for low-end devices.</li>
+        </ul>
+        <a href="https://duck-run-lac.vercel.app/" target="_blank" rel="noopener" class="card-link">Play it live <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section id="zero-hour" class="section section-left stop" data-u="0.64" data-cam="1" data-frame="-1" data-sector="T7 · ZERO HOUR" data-kind="flag" data-num="P2" data-title="Zero Hour · Runner-Up" data-sub="ScottishPower Challenge · StrathHack 2026" data-date="Live" data-flag="purple">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Purple flag · Podium</p>
+        <h2 class="section-title">Zero Hour</h2>
+        <p class="milestone-meta mono">Runner-up · ScottishPower Challenge, StrathHack 2026 · Node.js, Server-Sent Events</p>
+        <ul class="points">
+          <li>Built the multiplayer server and room API: a host screen plus up to <strong>15 teams</strong> live on mobile.</li>
+          <li>Server-side role validation and ordered transactions, eliminating race conditions on a shared £3M budget.</li>
+          <li>Resilient reconnects, late joiners and invalid room codes, backed by a <strong>323-test</strong> suite.</li>
+        </ul>
+        <a href="https://team-20-1.onrender.com/" target="_blank" rel="noopener" class="card-link">Play it live <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section id="gdsc" class="section section-right stop" data-u="0.73" data-cam="-1" data-frame="1" data-sector="PIT · GDSC" data-kind="pit" data-num="PIT 2" data-title="Technical Lead" data-sub="Google Developer Student Clubs · Strathclyde" data-date="Sept 2026 – Present">
+      <div class="panel panel-pit reveal">
+        <p class="section-kicker mono">Pit stop 02 · Work experience</p>
+        <h2 class="section-title">GDSC Technical Lead</h2>
+        <p class="milestone-meta mono">Google Developer Student Clubs, Strathclyde Chapter · Sept 2026 – Present</p>
+        <ul class="points">
+          <li>Design and deliver hands-on software engineering workshops for a community of <strong>150+ students</strong>.</li>
+          <li>Restructured workshops around rapid prototyping, so attendees build working software in the first 20 minutes.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="events" class="section section-left stop" data-u="0.81" data-cam="1" data-frame="-1" data-sector="T8 · EVENTS" data-kind="flag" data-num="08" data-title="Hackathons and Industry" data-sub="StrathHack · GUTech Hack · Baillie Gifford" data-flag="blue">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Blue flag · Extra activities</p>
+        <h2 class="section-title">Hackathons and events</h2>
+        <p class="milestone-meta mono">Competitor and attendee · Glasgow</p>
+        <ul class="points">
+          <li><strong>StrathHack 2026:</strong> runner-up, ScottishPower “Defend Your Network” challenge.</li>
+          <li><strong>GUTech Hack:</strong> deployed a multiplayer game for the JPMorgan Chase challenge.</li>
+          <li><strong>Baillie Gifford Insight Day:</strong> ways of working, recruitment and networking.</li>
+          <li><strong>Volleyball:</strong> competitive player for the University of Strathclyde.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="skills" class="section section-right stop" data-u="0.89" data-cam="-1" data-frame="1" data-sector="T9 · SKILLS" data-kind="flag" data-num="09" data-title="Car setup" data-sub="Python · Java · TypeScript · SQL" data-flag="yellow">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Yellow flag · Car setup</p>
+        <h2 class="section-title">Skills</h2>
+        <dl class="skills">
+          <div><dt>Languages</dt><dd>Python, Java, JavaScript, TypeScript, SQL, HTML/CSS</dd></div>
+          <div><dt>Testing</dt><dd>Unit and integration testing, Vitest, Node.js test runner, regression suites, bug triage, cross-browser QA</dd></div>
+          <div><dt>APIs and data</dt><dd>REST, JSON, HTTP, Server-Sent Events, Spring Boot, Node.js, Supabase (PostgreSQL, Realtime)</dd></div>
+          <div><dt>Tools</dt><dd>Git, GitHub PR workflow, Vite, Three.js, Render, Vercel, AI coding assistants</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="contact" class="section section-left stop" data-u="1" data-cam="-1" data-frame="-1.5" data-aerial="1"
+      data-sector="FINISH · CONTACT">
+      <div class="panel panel-wide reveal">
+        <p class="section-kicker mono">Chequered flag</p>
+        <h2 class="section-title">Get in touch</h2>
+        <p class="contact-lead">Open to software engineering internships, collaborations and hackathon teams.</p>
+        <div class="contact-grid">
+          <a class="contact-item" href="mailto:vansh.thacker06@gmail.com">
+            <span class="contact-label mono">Email</span>
+            <span class="contact-value">vansh.thacker06@gmail.com</span>
+          </a>
+          <a class="contact-item" href="https://www.linkedin.com/in/vansh-thacker/" target="_blank" rel="noopener">
+            <span class="contact-label mono">LinkedIn</span>
+            <span class="contact-value">in/vansh-thacker</span>
+          </a>
+          <a class="contact-item" href="https://github.com/Vansh-Thacker" target="_blank" rel="noopener">
+            <span class="contact-label mono">GitHub</span>
+            <span class="contact-value">Vansh-Thacker</span>
+          </a>
+          <div class="contact-item">
+            <span class="contact-label mono">Location</span>
+            <span class="contact-value">Glasgow, Scotland, UK</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Vansh Thacker</p>
+    <p class="mono">Rendered in real time with Three.js</p>
   </footer>
 
   <script type="module" src="main.js"></script>

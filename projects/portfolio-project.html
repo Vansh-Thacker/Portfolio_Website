@@ -3,67 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Briefing | F1 Portfolio</title>
+    <title>3D F1 Portfolio | Vansh Thacker</title>
+    <meta name="theme-color" content="#0b0b10">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="project-page">
 
-    <header>
-        <div class="logo">/ PROJECT <span> DESCRITPTION </span></div>
-        <nav>
-            <ul>
-                <li><a href="../index.html#projects">← Return to Paddock</a></li>
-            </ul>
+    <header class="site-header">
+        <a href="../index.html" class="brand" aria-label="Vansh Thacker, home">
+            <span class="brand-mark">VT</span>
+            <span class="brand-name">Vansh Thacker</span>
+        </a>
+        <nav class="site-nav site-nav-static">
+            <a href="../index.html#projects">&larr; Back to projects</a>
         </nav>
     </header>
 
-    <section class="project-detail-hero">
-        <div class="hero-content">
-            <h1 class="section-title">PROJECT:  PORTFOLIO</h1>
-            <p class="status-tag">TRACK STATUS: GREEN SECTOR</p>
-        </div>
-    </section>
+    <main>
+        <section class="project-hero">
+            <p class="section-kicker mono">Project 02</p>
+            <h1 class="hero-title">3D F1 Portfolio</h1>
+            <p class="status-tag green">Status: green flag</p>
+        </section>
 
-    <main class="grid-section">
         <div class="project-grid">
-            <div class="project-info">
-                <div class="content-wrapper">
-                    <h3>01. DESIGN THEME</h3>
-                    <p class="about-p">
-                       A performance-focused portfolio designed for speed and clarity. The interface draws from motorsport engineering—utilizing an aggressive, high-contrast visual language to create a fast-loading, responsive environment that mirrors the efficiency of a real-time monitoring system.
-                    </p>
+            <article class="panel">
+                <h2><span>01</span>Design theme</h2>
+                <p>
+                    A performance-focused portfolio inspired by motorsport engineering. The home page is a real-time 3D night circuit where every career milestone is a stop on the lap, marked by a trackside LED board. Scrolling drives a procedurally modelled F1 car from stop to stop, while a live telemetry HUD tracks turn, speed and lap progress.
+                </p>
 
-                    <h3>02. UI/UX </h3>
-                    <p class="about-p">
-                        The site utilizes <strong>modern CSS Grid and Flexbox</strong> for a responsive layout that scales perfectly from desktop to mobile. Heavy focus was placed on <strong>CSS variables</strong> for consistent branding and <strong>backdrop-filters</strong> for a premium "glassmorphism" feel.
-                    </p>
+                <h2><span>02</span>3D engine</h2>
+                <p>
+                    Built with <strong>Three.js</strong> and no build step. The car is sculpted in code from lofted cross-sections, aerofoil wing elements and lathed Pirelli tyres. The circuit, grandstands, floodlights and boards are generated too, lit with physically based materials, soft shadows, an environment map and bloom. The camera cuts between parked three-quarter shots and a chase cam as you scroll.
+                </p>
 
-                     <div class="repo-button-container">
-                        <a href="https://github.com/KILLSWITCHER07" target="_blank" class="cta-btn big-repo-btn">
-                        <i class="fa-brands fa-github"></i> ACCESS REPOSITORY
-                        </a>
-                    </div>
-                </div>
-            </div>
+                <h2><span>03</span>UI and accessibility</h2>
+                <p>
+                    Content sits on glass panels over the scene, laid out with <strong>CSS Grid and Flexbox</strong> and themed with <strong>CSS variables</strong>. It respects reduced-motion settings and falls back to video when WebGL is unavailable.
+                </p>
+                <a href="https://github.com/Vansh-Thacker/Portfolio_Website" target="_blank" rel="noopener" class="btn btn-primary">View repository</a>
+            </article>
 
-            <div class="project-specs">
-                <div class="card">
-                    <h3>AERO SPECS</h3>
-                    <div class="spec-list">
-                        <div class="spec-item"><span>FRONT-END LANGUAGE:</span> HTML</div>
-                        <div class="spec-item"><span>STYLING:</span> CSS3 / Custom Variables</div>
-                        <div class="spec-item"><span>BACKEND</span>JavaScript </div>
-                        <div class="spec-item"><span>ANIMATION:</span> CSS Keyframes</div>
-                    </div>
-                </div>
-            </div>
+            <aside class="panel">
+                <h2>Aero specs</h2>
+                <ul class="spec-list">
+                    <li><span>Rendering</span> Three.js / WebGL</li>
+                    <li><span>Markup</span> HTML5</li>
+                    <li><span>Styling</span> CSS3, custom properties</li>
+                    <li><span>Logic</span> JavaScript (ES modules)</li>
+                    <li><span>Animation</span> Scroll-driven camera</li>
+                </ul>
+            </aside>
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2026 Vansh Portfolio | Design Documentation</p>
+    <footer class="site-footer">
+        <p>&copy; 2026 Vansh Thacker</p>
+        <p class="mono">Technical documentation</p>
     </footer>
 
 </body>
