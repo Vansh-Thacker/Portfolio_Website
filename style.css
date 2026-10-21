@@ -593,6 +593,24 @@ main {
   100% { transform: translateY(0); opacity: 0; }
 }
 
+/* ---------- Milestones ---------- */
+
+.milestone-meta {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: -0.5rem 0 1rem;
+}
+
+.panel.card {
+  width: min(520px, 100%);
+}
+
+.panel.card .section-kicker,
+.panel.card .section-title {
+  transform: translateZ(30px);
+}
+
 /* ---------- About ---------- */
 
 .facts {
@@ -1068,7 +1086,13 @@ html:not(.js) .reveal {
   }
 
   .eyebrow {
-    font-size: 0.68rem;
+    display: none;
+  }
+
+  /* Leave the top of the screen for the car */
+  .stop:not(.hero) {
+    justify-content: flex-start;
+    padding-top: 46vh;
   }
 
   .hero {

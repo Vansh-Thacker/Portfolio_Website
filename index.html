@@ -20,7 +20,7 @@
   </script>
 
   <script type="importmap">
-    { "imports": { "three": "./vendor/three.module.min.js" } }
+    { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
   </script>
 </head>
 
@@ -47,8 +47,8 @@
     </button>
     <nav id="site-nav" class="site-nav">
       <a href="#about" data-section="about">About</a>
-      <a href="#projects" data-section="projects">Projects</a>
-      <a href="#experience" data-section="experience">Experience</a>
+      <a href="#education" data-section="education open-day welcome-guide ambassador">Career</a>
+      <a href="#career-predictor" data-section="career-predictor portfolio">Projects</a>
       <a href="#contact" class="nav-cta" data-section="contact">Contact</a>
     </nav>
   </header>
@@ -56,7 +56,7 @@
   <!-- Lap telemetry HUD -->
   <aside class="hud" aria-hidden="true">
     <div class="hud-row">
-      <span class="hud-label">Sector</span>
+      <span class="hud-label">Turn</span>
       <span class="hud-value" id="hud-sector">GRID</span>
     </div>
     <div class="hud-row">
@@ -69,7 +69,10 @@
   </aside>
 
   <main>
-    <section id="home" class="hero section" data-frame="-1.5">
+    <!-- Each section is a stop on the lap. data-u is the position on the track (0-1),
+         data-cam the side the camera parks on, data-frame where the car sits on screen
+         (-1 right, 1 left), and data-num/title/sub/date feed the trackside board. -->
+    <section id="home" class="hero section stop" data-u="0" data-cam="1" data-frame="-1.5" data-sector="GRID">
       <div class="hero-inner">
         <p class="eyebrow mono"><span class="dot"></span> Computer Science · University of Strathclyde</p>
         <h1 class="hero-title">
@@ -77,23 +80,24 @@
           <span class="accent">Thacker</span>
         </h1>
         <p class="hero-lead">
-          Computer Science undergraduate and AI enthusiast, building technical projects with the
-          precision and pace of a race team.
+          Computer Science undergraduate and AI enthusiast. Scroll to take a lap of my career so far:
+          every stop on the circuit is a milestone.
         </p>
         <div class="hero-actions">
-          <a href="#projects" class="btn btn-primary">View projects</a>
+          <a href="#about" class="btn btn-primary">Start the lap</a>
           <a href="#contact" class="btn btn-ghost">Get in touch</a>
         </div>
       </div>
       <a href="#about" class="scroll-cue mono" aria-label="Scroll to About">
-        <span>Scroll to start the lap</span>
+        <span>Scroll to drive</span>
         <i></i>
       </a>
     </section>
 
-    <section id="about" class="section section-right" data-frame="1" data-sector="S1 · ABOUT">
+    <section id="about" class="section section-right stop" data-u="0.07" data-cam="-1" data-frame="1"
+      data-sector="T1 · ABOUT" data-num="01" data-title="Driver profile" data-sub="Computer Science · AI">
       <div class="panel reveal">
-        <p class="section-kicker mono">Sector 01</p>
+        <p class="section-kicker mono">Turn 01 · Driver profile</p>
         <h2 class="section-title">About me</h2>
         <p>
           I am a <strong>Computer Science undergraduate at the University of Strathclyde</strong>, currently in
@@ -115,69 +119,79 @@
       </div>
     </section>
 
-    <section id="projects" class="section section-left" data-frame="-1" data-sector="S2 · PROJECTS">
-      <div class="section-head reveal">
-        <p class="section-kicker mono">Sector 02</p>
-        <h2 class="section-title">Projects</h2>
-      </div>
-      <div class="cards">
-        <article class="card tilt reveal">
-          <div class="card-glare"></div>
-          <p class="card-index mono">P1</p>
-          <h3>Career Predictor App</h3>
-          <p>Predicts career paths from user input, using data-driven insights stored and queried with SQL.</p>
-          <ul class="tags">
-            <li>Python</li><li>SQL</li><li>Analytics</li>
-          </ul>
-          <a href="projects/career-predictor.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
-        </article>
-        <article class="card tilt reveal">
-          <div class="card-glare"></div>
-          <p class="card-index mono">P2</p>
-          <h3>3D F1 Portfolio</h3>
-          <p>This site: an F1-themed portfolio rendered in real time with Three.js, where scrolling drives the car around a lap.</p>
-          <ul class="tags">
-            <li>Three.js</li><li>JavaScript</li><li>HTML/CSS</li>
-          </ul>
-          <a href="projects/portfolio-project.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
-        </article>
-      </div>
-    </section>
-
-    <section id="experience" class="section section-right" data-frame="1" data-sector="S3 · EXPERIENCE">
+    <section id="education" class="section section-left stop" data-u="0.17" data-cam="1" data-frame="-1"
+      data-sector="T2 · EDUCATION" data-num="02" data-title="University of Strathclyde" data-sub="BSc Computer Science · Year 2">
       <div class="panel reveal">
-        <p class="section-kicker mono">Sector 03</p>
-        <h2 class="section-title">Career circuit</h2>
-        <ol class="timing-board">
-          <li>
-            <span class="pos mono">01</span>
-            <div class="entry">
-              <h3>Campus Ambassador</h3>
-              <p>Representing the university to promote higher education.</p>
-            </div>
-            <span class="time mono">Jan 2026 – Present</span>
-          </li>
-          <li>
-            <span class="pos mono">02</span>
-            <div class="entry">
-              <h3>Registration and Welcome Guide</h3>
-              <p>Helped students through their registration process at university.</p>
-            </div>
-            <span class="time mono">Sep 2025 – Oct 2025</span>
-          </li>
-          <li>
-            <span class="pos mono">03</span>
-            <div class="entry">
-              <h3>Open Day Helper</h3>
-              <p>Helped the university run a successful open day for prospective students.</p>
-            </div>
-            <span class="time mono">Sep 2025 – Oct 2025</span>
-          </li>
-        </ol>
+        <p class="section-kicker mono">Turn 02 · Education</p>
+        <h2 class="section-title">University of Strathclyde</h2>
+        <p class="milestone-meta mono">BSc Computer Science · Year 2 · Glasgow</p>
+        <p>
+          Studying Computer Science with a focus on <strong>Artificial Intelligence</strong>, building the
+          software engineering, data and teamwork foundations behind everything else on this lap.
+        </p>
       </div>
     </section>
 
-    <section id="contact" class="section section-left" data-frame="-1.5" data-sector="FINISH · CONTACT">
+    <section id="open-day" class="section section-right stop" data-u="0.29" data-cam="-1" data-frame="1"
+      data-sector="T3 · EXPERIENCE" data-num="03" data-title="Open Day Helper" data-sub="University of Strathclyde" data-date="Sep – Oct 2025">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Turn 03 · Experience</p>
+        <h2 class="section-title">Open Day Helper</h2>
+        <p class="milestone-meta mono">University of Strathclyde · Sep 2025 – Oct 2025</p>
+        <p>Helped the university run a successful open day for prospective students.</p>
+      </div>
+    </section>
+
+    <section id="welcome-guide" class="section section-left stop" data-u="0.4" data-cam="1" data-frame="-1"
+      data-sector="T4 · EXPERIENCE" data-num="04" data-title="Registration and Welcome Guide" data-sub="University of Strathclyde" data-date="Sep – Oct 2025">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Turn 04 · Experience</p>
+        <h2 class="section-title">Registration and Welcome Guide</h2>
+        <p class="milestone-meta mono">University of Strathclyde · Sep 2025 – Oct 2025</p>
+        <p>Helped new students through their registration process at university.</p>
+      </div>
+    </section>
+
+    <section id="career-predictor" class="section section-right stop" data-u="0.52" data-cam="-1" data-frame="1"
+      data-sector="T5 · PROJECT" data-num="05" data-title="Career Predictor App" data-sub="Python · SQL · Analytics" data-date="Project">
+      <article class="panel card tilt reveal">
+        <div class="card-glare"></div>
+        <p class="section-kicker mono">Turn 05 · Project</p>
+        <h2 class="section-title">Career Predictor App</h2>
+        <p>Predicts career paths from user input, using data-driven insights stored and queried with SQL.</p>
+        <ul class="tags">
+          <li>Python</li><li>SQL</li><li>MySQL</li><li>Matplotlib</li>
+        </ul>
+        <a href="projects/career-predictor.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
+      </article>
+    </section>
+
+    <section id="ambassador" class="section section-left stop" data-u="0.64" data-cam="1" data-frame="-1"
+      data-sector="T6 · EXPERIENCE" data-num="06" data-title="Campus Ambassador" data-sub="University of Strathclyde" data-date="Jan 2026 – Present">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Turn 06 · Experience</p>
+        <h2 class="section-title">Campus Ambassador</h2>
+        <p class="milestone-meta mono">University of Strathclyde · Jan 2026 – Present</p>
+        <p>Representing the university to promote higher education.</p>
+      </div>
+    </section>
+
+    <section id="portfolio" class="section section-right stop" data-u="0.77" data-cam="-1" data-frame="1"
+      data-sector="T7 · PROJECT" data-num="07" data-title="3D F1 Portfolio" data-sub="Three.js · WebGL · JavaScript" data-date="Project">
+      <article class="panel card tilt reveal">
+        <div class="card-glare"></div>
+        <p class="section-kicker mono">Turn 07 · Project</p>
+        <h2 class="section-title">3D F1 Portfolio</h2>
+        <p>This site: a real-time 3D circuit built with Three.js, with a procedurally modelled F1 car that drives my career as you scroll.</p>
+        <ul class="tags">
+          <li>Three.js</li><li>WebGL</li><li>JavaScript</li><li>HTML/CSS</li>
+        </ul>
+        <a href="projects/portfolio-project.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
+      </article>
+    </section>
+
+    <section id="contact" class="section section-left stop" data-u="1" data-cam="-1" data-frame="-1.5" data-aerial="1"
+      data-sector="FINISH · CONTACT">
       <div class="panel panel-wide reveal">
         <p class="section-kicker mono">Chequered flag</p>
         <h2 class="section-title">Get in touch</h2>

@@ -13,10 +13,27 @@ function hasWebGL() {
   }
 }
 
+const stopSections = [...document.querySelectorAll('main .stop')];
+const stops = stopSections.map((el) => {
+  const d = el.dataset;
+  return {
+    u: Number(d.u),
+    cam: Number(d.cam || 1),
+    frame: Number(d.frame || 0),
+    aerial: Number(d.aerial || 0),
+    num: d.num,
+    title: d.title,
+    sub: d.sub || '',
+    date: d.date || '',
+  };
+});
+
 async function initScene() {
   if (!hasWebGL()) throw new Error('WebGL unavailable');
+  // Board text uses the web fonts, so wait for them before drawing
+  await Promise.race([document.fonts?.ready, new Promise((r) => setTimeout(r, 1500))]);
   const { createScene } = await import('./scene.js');
-  scene = createScene(canvas, { reducedMotion });
+  scene = createScene(canvas, { stops, reducedMotion });
 }
 
 function useFallback() {
@@ -87,29 +104,39 @@ const header = document.querySelector('.site-header');
 const hudLap = document.getElementById('hud-lap');
 const hudSpeed = document.getElementById('hud-speed');
 const hudSector = document.getElementById('hud-sector');
-const sections = [...document.querySelectorAll('main section')];
 const navLinks = [...document.querySelectorAll('.site-nav a')];
 
-function scrollProgress() {
+// Scroll position where each stop's section is centred in the viewport
+let anchors = [];
+function measure() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
-  return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  anchors = stopSections.map((el) => Math.min(max, Math.max(0, el.offsetTop + el.offsetHeight / 2 - window.innerHeight / 2)));
+}
+
+// Fractional stop index: 2.5 is halfway between the third and fourth stops
+function stopIndex(y) {
+  if (y <= anchors[0]) return 0;
+  for (let i = 0; i < anchors.length - 1; i++) {
+    if (y < anchors[i + 1]) return i + (y - anchors[i]) / Math.max(1, anchors[i + 1] - anchors[i]);
+  }
+  return anchors.length - 1;
 }
 
 function onScroll() {
-  const p = scrollProgress();
-  scene?.setProgress(p);
-  hudLap.style.width = `${(p * 100).toFixed(1)}%`;
+  const f = stopIndex(window.scrollY);
+  scene?.setStop(f);
+  hudLap.style.width = `${((f / (stops.length - 1)) * 100).toFixed(1)}%`;
   header.classList.toggle('scrolled', window.scrollY > 20);
 
-  const mid = window.scrollY + window.innerHeight * 0.45;
-  let current = sections[0];
-  for (const s of sections) if (s.offsetTop <= mid) current = s;
+  const current = stopSections[Math.min(stopSections.length - 1, Math.round(f))];
   hudSector.textContent = current.dataset.sector || 'GRID';
-  scene?.setFrame(Number(current.dataset.frame || 0));
-  navLinks.forEach((a) => a.classList.toggle('active', a.dataset.section === current.id));
+  navLinks.forEach((a) => a.classList.toggle('active', a.dataset.section.split(' ').includes(current.id)));
 }
 window.addEventListener('scroll', onScroll, { passive: true });
-window.addEventListener('resize', onScroll);
+window.addEventListener('resize', () => {
+  measure();
+  onScroll();
+});
 
 function hudLoop() {
   if (scene) hudSpeed.textContent = Math.round(scene.speed);
@@ -177,6 +204,7 @@ initScene()
     useFallback();
   })
   .finally(() => {
+    measure();
     onScroll();
     hudLoop();
     runIntro();
