@@ -24,6 +24,9 @@ const stops = stopSections.map((el) => {
     num: d.num,
     title: d.title,
     sub: d.sub || '',
+    kind: d.kind,
+    pit: d.kind === 'pit' ? 1 : 0,
+    flag: d.flag,
     date: d.date || '',
   };
 });

@@ -611,6 +611,56 @@ main {
   transform: translateZ(30px);
 }
 
+.points {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  color: #d6d6de;
+}
+
+.points li {
+  position: relative;
+  padding-left: 20px;
+}
+
+.points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 10px;
+  height: 3px;
+  background: var(--red);
+}
+
+.panel .card-link {
+  display: inline-block;
+  margin-top: 1.25rem;
+}
+
+.panel-pit::before {
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #f2c200 0 18px, #141414 18px 36px);
+}
+
+.skills {
+  display: grid;
+  gap: 14px;
+}
+
+.skills dt {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--red-bright);
+}
+
+.skills dd {
+  color: #e6e6ec;
+}
+
 /* ---------- About ---------- */
 
 .facts {
@@ -1152,4 +1202,9 @@ html:not(.js) .reveal {
   .project-page .brand-name {
     display: none;
   }
+}
+
+/* Links inside milestone panels are ordinary links, not whole-card overlays */
+.panel:not(.card) .card-link::after {
+  display: none;
 }

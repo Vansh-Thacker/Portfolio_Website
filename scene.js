@@ -89,6 +89,55 @@ function boardTexture({ num, title, sub, date }) {
   });
 }
 
+const FLAG_COLOURS = {
+  green: ['#139a43', '#ffffff'],
+  purple: ['#7a2bd1', '#ffffff'],
+  blue: ['#1d5bd8', '#ffffff'],
+  yellow: ['#f2c200', '#141414'],
+  white: ['#efefef', '#141414'],
+  chequered: ['#111111', '#ffffff'],
+};
+
+// Marshal flag carrying one milestone, in F1 flag colours
+function flagTexture({ flag = 'green', num, title, sub, date }) {
+  const [bg, ink] = FLAG_COLOURS[flag] || FLAG_COLOURS.green;
+  return canvasTexture(1024, 640, (ctx, w, h) => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+    if (flag === 'chequered') {
+      for (let y = 0; y < h; y += 64) {
+        for (let x = 0; x < w; x += 64) {
+          if ((x + y) / 64 % 2) {
+            ctx.fillStyle = '#f2f2f2';
+            ctx.fillRect(x, y, 64, 64);
+          }
+        }
+      }
+      ctx.fillStyle = 'rgba(10,10,12,0.85)';
+      ctx.fillRect(40, 60, w - 80, h - 120);
+    }
+    // Fabric shading
+    const g = ctx.createLinearGradient(0, 0, w, 0);
+    for (let i = 0; i <= 6; i++) g.addColorStop(i / 6, i % 2 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.06)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = ink;
+    ctx.globalAlpha = 0.9;
+    ctx.font = 'italic 900 120px "Titillium Web", Arial, sans-serif';
+    ctx.fillText(num, 80, 190);
+    ctx.globalAlpha = 1;
+    ctx.font = '700 66px "Titillium Web", Arial, sans-serif';
+    wrapText(ctx, title.toUpperCase(), 80, 300, w - 160, 70, 2);
+    ctx.font = '400 40px "Titillium Web", Arial, sans-serif';
+    ctx.fillText(sub, 80, 470);
+    if (date) {
+      ctx.font = '600 34px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(date.toUpperCase(), w - 80, 130);
+    }
+  });
+}
+
 export function createScene(canvas, { stops, reducedMotion = false }) {
   const isSmall = window.matchMedia('(max-width: 720px)').matches;
 
@@ -175,12 +224,13 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
   }
   const seg = trackLength / SAMPLES;
 
-  function strip(a, b, y, material, { colorAt, vScale = 1 / TRACK_WIDTH } = {}) {
+  function strip(a, b, y, material, { colorAt, vScale = 1 / TRACK_WIDTH, skip } = {}) {
     const pos = [];
     const uv = [];
     const col = [];
     const c = new THREE.Color();
     for (let i = 0; i < SAMPLES; i++) {
+      if (skip?.(i)) continue;
       const f0 = frames[i];
       const f1 = frames[i + 1];
       const v = (f, o) => [f.p.x + f.side.x * o, y, f.p.z + f.side.z * o];
@@ -205,10 +255,11 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
     return m;
   }
 
-  function wall(o, h, material, uScale) {
+  function wall(o, h, material, uScale, skip) {
     const pos = [];
     const uv = [];
     for (let i = 0; i < SAMPLES; i++) {
+      if (skip?.(i)) continue;
       const f0 = frames[i];
       const f1 = frames[i + 1];
       const x0 = f0.p.x + f0.side.x * o, z0 = f0.p.z + f0.side.z * o;
@@ -228,6 +279,15 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
   }
 
   const half = TRACK_WIDTH / 2;
+
+  // Pit boxes: work experience stops pull off the track on the side away from the camera
+  const PIT_REACH = 40; // metres either side of the box where the pit lane exists
+  const pits = stops
+    .filter((s) => s.kind === 'pit')
+    .map((s) => ({ ...s, u: s.u % 1, side: -Math.sign(s.cam || 1), centre: Math.round((s.u % 1) * SAMPLES) }));
+  const pitSamples = Math.round(PIT_REACH / seg);
+  const inPit = (i, side) =>
+    pits.some((p) => p.side === side && Math.abs(((i - p.centre + SAMPLES * 1.5) % SAMPLES) - SAMPLES / 2) <= pitSamples);
 
   // Asphalt with grain, a rubbered-in racing line and a light wet sheen
   const asphaltTex = canvasTexture(512, 512, (ctx, w, h) => {
@@ -272,10 +332,10 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
   });
   barrierTex.wrapS = THREE.RepeatWrapping;
   const barrierMat = new THREE.MeshStandardMaterial({ map: barrierTex, roughness: 0.6, side: THREE.DoubleSide });
-  wall(half + 11, 1.1, barrierMat, 1 / 16);
-  wall(-half - 11, 1.1, barrierMat, 1 / 16);
-  strip(half + 10.9, half + 11.1, 1.12, new THREE.MeshBasicMaterial({ color: 0xff3324 }));
-  strip(-half - 11.1, -half - 10.9, 1.12, new THREE.MeshBasicMaterial({ color: 0xdfe6ff }));
+  wall(half + 11, 1.1, barrierMat, 1 / 16, (i) => inPit(i, 1));
+  wall(-half - 11, 1.1, barrierMat, 1 / 16, (i) => inPit(i, -1));
+  strip(half + 10.9, half + 11.1, 1.12, new THREE.MeshBasicMaterial({ color: 0xff3324 }), { skip: (i) => inPit(i, 1) });
+  strip(-half - 11.1, -half - 10.9, 1.12, new THREE.MeshBasicMaterial({ color: 0xdfe6ff }), { skip: (i) => inPit(i, -1) });
 
   // Start / finish line and grid slots
   {
@@ -449,47 +509,178 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
     scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 1.2, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.6 })));
   }
 
-  // ---------- Milestone boards ----------
-  // Each stop: { u, cam (+1/-1 side the parked camera sits), frame, num, title, sub, date }
-  // The parked camera looks back at the car from ahead, so the board stands
-  // behind the car on the far side of the track, turned to face the camera.
-  stops.forEach((s) => {
-    if (!s.title) return;
-    const ub = (s.u - 13 / trackLength + 1) % 1;
-    const p = curve.getPointAt(ub);
-    const t = curve.getTangentAt(ub);
-    const side = new THREE.Vector3().crossVectors(t, UP).normalize();
-    const boardSide = -Math.sign(s.cam || 1);
+  // ---------- Milestones: marshal flags and pit boxes ----------
+  // Each stop: { u, cam (+1/-1 side the parked camera sits), frame, kind, flag, num, title, sub, date }
+  // The parked camera looks back at the car from ahead, so flags stand behind
+  // the car on the far side of the track, turned to face the camera.
+  const flags = [];
+  const frameAt = (u) => {
+    const p = curve.getPointAt(((u % 1) + 1) % 1);
+    const t = curve.getTangentAt(((u % 1) + 1) % 1);
+    return { p, t, side: new THREE.Vector3().crossVectors(t, UP).normalize() };
+  };
+  const parkedCamAt = (s) => {
+    const f = frameAt(s.u);
+    return f.p.clone().addScaledVector(f.t, Math.cos(0.95) * 8.4).addScaledVector(f.side, Math.sin(0.95 * s.cam) * 8.4);
+  };
+  const steel = new THREE.MeshStandardMaterial({ color: 0x8c8c96, roughness: 0.3, metalness: 0.9 });
+
+  stops.filter((s) => s.kind === 'flag').forEach((s) => {
+    const f = frameAt(s.u - 13 / trackLength);
+    const flagSide = -Math.sign(s.cam || 1);
     const g = new THREE.Group();
-    g.position.copy(p).addScaledVector(side, boardSide * (half + 4));
-    const cp = curve.getPointAt(s.u % 1);
-    const ct = curve.getTangentAt(s.u % 1);
-    const cs = new THREE.Vector3().crossVectors(ct, UP).normalize();
-    const camAt = cp.clone().addScaledVector(ct, Math.cos(0.95) * 8.4).addScaledVector(cs, Math.sin(0.95 * s.cam) * 8.4);
-    g.lookAt(camAt.x, 0, camAt.z);
-    const frameMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22, roughness: 0.5, metalness: 0.6 });
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(8.4, 4.4, 0.3), frameMat);
-    frame.position.y = 3.3;
-    frame.castShadow = true;
-    g.add(frame);
-    const screen = new THREE.Mesh(
-      new THREE.PlaneGeometry(8, 4),
-      new THREE.MeshBasicMaterial({ map: boardTexture(s), toneMapped: false, color: 0xb4b4b4 })
-    );
-    screen.position.set(0, 3.3, 0.16);
-    g.add(screen);
-    for (const x of [-3, 3]) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.2, 0.25), frameMat);
-      leg.position.set(x, 0.6, 0);
-      g.add(leg);
-    }
+    g.position.copy(f.p).addScaledVector(f.side, flagSide * (half + 4));
+    const cam = parkedCamAt(s);
+    g.lookAt(cam.x, 0, cam.z);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 6.6, 12), steel);
+    pole.position.set(-3.3, 3.3, 0);
+    pole.castShadow = true;
+    g.add(pole);
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), steel);
+    finial.position.set(-3.3, 6.65, 0);
+    g.add(finial);
+    const geo = new THREE.PlaneGeometry(6.4, 4, 36, 18);
+    geo.translate(3.2 - 3.3, 0, 0);
+    const cloth = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+      map: flagTexture(s), roughness: 0.75, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: 0.18,
+    }));
+    cloth.material.emissiveMap = cloth.material.map;
+    cloth.position.y = 4.4;
+    cloth.castShadow = true;
+    g.add(cloth);
+    flags.push({ geo, base: Float32Array.from(geo.attributes.position.array), phase: Math.random() * 6 });
     scene.add(g);
   });
+
+  // Animate cloth: a travelling wave pinned at the pole
+  function waveFlags(t) {
+    for (const fl of flags) {
+      const pos = fl.geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = fl.base[i * 3] + 3.3; // 0 at the pole
+        const y = fl.base[i * 3 + 1];
+        const k = x / 6.4;
+        pos.setZ(i, Math.sin(x * 1.3 - t * 4.2 + fl.phase + y * 0.25) * 0.38 * k + Math.sin(x * 2.9 - t * 6.1) * 0.08 * k);
+        pos.setY(i, y - k * k * 0.35);
+      }
+      pos.needsUpdate = true;
+      fl.geo.computeVertexNormals();
+    }
+  }
+
+  // Pit box: apron, garage with lit interior, overhead sign and pit crew
+  const apronMat = new THREE.MeshStandardMaterial({ map: asphaltTex, color: 0x55555e, roughness: 0.7 });
+  const pitLineMat = new THREE.MeshStandardMaterial({ color: 0xf2c200, roughness: 0.6 });
+  pits.forEach((p) => {
+    const inThis = (i) => Math.abs(((i - p.centre + SAMPLES * 1.5) % SAMPLES) - SAMPLES / 2) <= pitSamples;
+    const [a, b] = p.side > 0 ? [half + 1.3, half + 11] : [-half - 11, -half - 1.3];
+    strip(a, b, 0.025, apronMat, { skip: (i) => !inThis(i) });
+    const lo = p.side > 0 ? half + 1.6 : -half - 1.8;
+    strip(lo, lo + 0.2, 0.03, pitLineMat, { skip: (i) => !inThis(i) });
+
+    const f = frameAt(p.u);
+    const box = f.p.clone().addScaledVector(f.side, p.side * (half + 5.5));
+    const garage = new THREE.Group();
+    garage.position.copy(f.p).addScaledVector(f.side, p.side * (half + 14));
+    garage.lookAt(f.p.x, 0, f.p.z);
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x1b1b22, roughness: 0.6, metalness: 0.3 });
+    const W = 16;
+    const back = new THREE.Mesh(new THREE.BoxGeometry(W, 6, 0.4), wallMat);
+    back.position.set(0, 3, -3.5);
+    garage.add(back);
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(W - 1, 4.6), new THREE.MeshBasicMaterial({ map: boardTexture(p), toneMapped: false, color: 0x9a9a9a }));
+    glow.position.set(0, 3, -3.28);
+    garage.add(glow);
+    for (const x of [-W / 2, W / 2]) {
+      const sideWall = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6, 7), wallMat);
+      sideWall.position.set(x, 3, 0);
+      garage.add(sideWall);
+    }
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(W + 0.8, 0.5, 8), wallMat);
+    roof.position.set(0, 6.25, 0.3);
+    garage.add(roof);
+    const fascia = new THREE.Mesh(new THREE.BoxGeometry(W + 0.8, 0.3, 0.1), new THREE.MeshBasicMaterial({ color: RED }));
+    fascia.position.set(0, 5.9, 4.3);
+    garage.add(fascia);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, 7), new THREE.MeshStandardMaterial({ color: 0x2a2a33, roughness: 0.25, metalness: 0.2 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, 0.03, 0);
+    garage.add(floor);
+    const lamp = new THREE.PointLight(0xfff1dd, 30, 22, 1.6);
+    lamp.position.set(0, 5.4, 1.5);
+    garage.add(lamp);
+    scene.add(garage);
+
+    // Pit crew around the box: four wheel crews, front and rear jacks, lollipop
+    const suit = new THREE.MeshStandardMaterial({ color: 0x1a1a1f, roughness: 0.7 });
+    const stripe = new THREE.MeshStandardMaterial({ color: RED, roughness: 0.5 });
+    const lid = new THREE.MeshStandardMaterial({ color: 0x9a9aa2, roughness: 0.4 });
+    // Kept behind and beside the car so the camera, parked ahead, sees past them
+    const spots = [[1.5, 1.8], [-1.5, 1.8], [1.6, -1.8], [-1.6, -1.8], [0, -3.6], [-2.6, 0.2]];
+    for (const [lx, lz] of spots) {
+      const person = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.85, 6, 12), suit);
+      body.position.y = 0.75;
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.12, 12), stripe);
+      band.position.y = 0.95;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), lid);
+      head.position.y = 1.55;
+      person.add(body, band, head);
+      person.position.copy(box).addScaledVector(f.side, lx).addScaledVector(f.t, lz);
+      person.lookAt(box.x, 0, box.z);
+      // Kneel the wheel crews
+      if (Math.abs(lz) > 1 && Math.abs(lz) < 2) person.scale.y = 0.72;
+      person.traverse((o) => (o.castShadow = true));
+      scene.add(person);
+    }
+  });
+
+  // How far the car sits towards a pit box (metres along its side vector)
+  function pitOffset(u) {
+    let off = 0;
+    for (const p of pits) {
+      let d = Math.abs(u - p.u) * trackLength;
+      d = Math.min(d, trackLength - d);
+      off += p.side * (half + 5.5) * smoothstep(PIT_REACH, 14, d);
+    }
+    return off;
+  }
 
   // ---------- Car ----------
   let car = buildCar();
   scene.add(car.group);
   if (isSmall) car.group.traverse((o) => (o.castShadow = false));
+
+  // Rival cars lapping in their own lanes, so the circuit feels like a race
+  const rivalSpecs = [
+    { base: '#00a19c', number: '44', helmetColor: 0xffffff, lane: 3.4, speed: 54, u0: 0.31 },
+    { base: '#ff8000', number: '4', helmetColor: 0x1d5bd8, lane: -3.4, speed: 57, u0: 0.58 },
+    { base: '#1e3cd6', number: '1', helmetColor: 0xf2c200, lane: 3.4, speed: 59, u0: 0.83 },
+    { base: '#0b6e5f', number: '14', helmetColor: 0xffffff, lane: -3.4, speed: 51, u0: 0.12 },
+  ].slice(0, isSmall ? 2 : 4);
+  const rivals = rivalSpecs.map((spec) => {
+    const r = buildCar(spec);
+    r.group.traverse((o) => (o.castShadow = false));
+    scene.add(r.group);
+    return { ...spec, car: r, u: spec.u0 };
+  });
+  const rp = new THREE.Vector3();
+  const rt = new THREE.Vector3();
+  const rs = new THREE.Vector3();
+  function driveRivals(dt) {
+    const pace = reducedMotion ? 0.25 : 1;
+    for (const r of rivals) {
+      const step = r.speed * pace * dt;
+      r.u = (r.u + step / trackLength) % 1;
+      curve.getPointAt(r.u, rp);
+      curve.getTangentAt(r.u, rt);
+      rs.crossVectors(rt, UP).normalize();
+      r.car.group.position.copy(rp).addScaledVector(rs, r.lane);
+      r.car.group.rotation.y = Math.atan2(rt.x, rt.z);
+      r.car.spin(step);
+      r.car.tick(elapsed + r.u0 * 10);
+    }
+  }
 
   // Optional photoreal model: drop a glTF at assets/f1-car.glb to replace the procedural car.
   // assets/f1-car.json may set { "rotateY": degrees, "length": metres }.
@@ -556,7 +747,7 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
     const b = stops[i + 1];
     const ub = b.u < a.u ? b.u + 1 : b.u;
     const mix = (k) => (a[k] || 0) + ((b[k] || 0) - (a[k] || 0)) * e;
-    return { u: a.u + (ub - a.u) * e, moving: Math.sin(Math.PI * e), cam: mix('cam'), frame: mix('frame'), aerial: mix('aerial') };
+    return { u: a.u + (ub - a.u) * e, moving: Math.sin(Math.PI * e), cam: mix('cam'), frame: mix('frame'), aerial: mix('aerial'), pit: mix('pit') };
   }
 
   function update(dt) {
@@ -569,6 +760,9 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
     curve.getPointAt(u, v.pos);
     curve.getTangentAt(u, v.fwd);
     v.side.crossVectors(v.fwd, UP).normalize();
+    v.pos.addScaledVector(v.side, pitOffset(u));
+    driveRivals(dt);
+    waveFlags(elapsed);
 
     // Car placement, wheel spin and steering
     car.group.position.copy(v.pos);
@@ -593,8 +787,8 @@ export function createScene(canvas, { stops, reducedMotion = false }) {
     const drift = reducedMotion ? 0 : Math.sin(elapsed * 0.15) * 0.22;
     const ang = 0.95 * L.cam + drift + mx * 0.3;
     v.dir.copy(v.fwd).multiplyScalar(Math.cos(ang)).addScaledVector(v.side, Math.sin(ang));
-    v.parked.copy(v.pos).addScaledVector(v.dir, isSmall ? 12 : 8.4);
-    v.parked.y = 1.45 + my * 0.5;
+    v.parked.copy(v.pos).addScaledVector(v.dir, (isSmall ? 12 : 8.4) + L.pit * 2.5);
+    v.parked.y = 1.45 + L.pit * 1.6 + my * 0.5;
     v.lookParked.copy(v.pos).setY(isSmall ? -2.4 : 0.55);
 
     // Chase: low and close behind the car

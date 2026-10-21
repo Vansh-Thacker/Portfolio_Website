@@ -22,9 +22,9 @@ function canvasTexture(w, h, draw, { repeat, srgb = true } = {}) {
 
 // Livery for lofted bodywork: u runs around the section (0 = right side,
 // 0.25 = top, 0.5 = left, 0.75 = underside), v runs nose to tail.
-function liveryTexture() {
+function liveryTexture(base, number) {
   return canvasTexture(1024, 1024, (ctx, w, h) => {
-    ctx.fillStyle = '#c40d0a';
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, w, h);
     // Darker red shading towards the lower flanks
     const g = ctx.createLinearGradient(0, 0, w, 0);
@@ -65,7 +65,7 @@ function liveryTexture() {
     // White centre stripe over the top
     ctx.fillStyle = '#f4f4f4';
     ctx.fillRect(0.25 * w - 10, 0, 20, h);
-    ctx.fillStyle = '#c40d0a';
+    ctx.fillStyle = base;
     ctx.fillRect(0.25 * w - 4, 0, 8, h);
     // Race number on the nose
     ctx.save();
@@ -75,8 +75,8 @@ function liveryTexture() {
     ctx.font = 'italic 900 64px "Titillium Web", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('07', 0, -60);
-    ctx.fillText('07', 0, 60);
+    ctx.fillText(number, 0, -60);
+    ctx.fillText(number, 0, 60);
     ctx.restore();
   });
 }
@@ -269,15 +269,16 @@ function tube(points, radius, segs = 48) {
 
 // ---------- Car ----------
 
-export function buildCar() {
+// Livery defaults to the hero car; rivals pass their own colours and number.
+export function buildCar({ base = '#c40d0a', number = '07', helmetColor = 0xffcf1a } = {}) {
   const group = new THREE.Group();
-  const livery = liveryTexture();
+  const livery = liveryTexture(base, number);
 
   const paint = new THREE.MeshPhysicalMaterial({
     map: livery, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.06,
   });
   const paintSolid = new THREE.MeshPhysicalMaterial({
-    color: 0xc40d0a, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.06,
+    color: base, metalness: 0.25, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.06,
   });
   const carbon = new THREE.MeshPhysicalMaterial({
     color: 0x8a8a8a, map: carbonTexture(), metalness: 0.3, roughness: 0.38, clearcoat: 0.7, clearcoatRoughness: 0.2,
@@ -287,7 +288,7 @@ export function buildCar() {
   const rubber = new THREE.MeshStandardMaterial({ color: 0x18181a, roughness: 0.92, side: THREE.DoubleSide });
   const metal = new THREE.MeshStandardMaterial({ color: 0x9a9aa4, roughness: 0.25, metalness: 1 });
   const visor = new THREE.MeshPhysicalMaterial({ color: 0x0a0a12, roughness: 0.05, metalness: 0.6, clearcoat: 1 });
-  const helmet = new THREE.MeshPhysicalMaterial({ color: 0xffcf1a, roughness: 0.25, clearcoat: 1 });
+  const helmet = new THREE.MeshPhysicalMaterial({ color: helmetColor, roughness: 0.25, clearcoat: 1 });
 
   const add = (geo, mat, opts = {}) => {
     const m = new THREE.Mesh(geo, mat);
