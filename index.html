@@ -4,172 +4,209 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vansh | F1 Portfolio</title>
-  <!-- Google Fonts -->
+  <title>Vansh Thacker | Computer Science & AI</title>
+  <meta name="description" content="Vansh Thacker, Computer Science undergraduate at the University of Strathclyde with a focus on Artificial Intelligence." />
+  <meta name="theme-color" content="#0b0b10" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap"
     rel="stylesheet">
-
   <link rel="stylesheet" href="style.css" />
+  <script>
+    document.documentElement.classList.add('js');
+    try { if (sessionStorage.getItem('introSeen')) document.documentElement.classList.add('intro-seen'); } catch (e) {}
+  </script>
+
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
 </head>
 
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#about">About Me</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#contact">Contact Details</a></li>
-      </ul>
+<body class="home">
+  <!-- 3D scene: a fixed canvas behind the page. The car drives one lap as you scroll. -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scene-scrim" aria-hidden="true"></div>
+
+  <!-- Start lights intro -->
+  <div class="start-lights" id="start-lights" aria-hidden="true">
+    <div class="lights-row">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p class="lights-label mono">Lights out and away we go</p>
+  </div>
+
+  <header class="site-header">
+    <a href="#home" class="brand" aria-label="Vansh Thacker, home">
+      <span class="brand-mark">VT</span>
+      <span class="brand-name">Vansh Thacker</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+      <span></span><span></span>
+    </button>
+    <nav id="site-nav" class="site-nav">
+      <a href="#about" data-section="about">About</a>
+      <a href="#projects" data-section="projects">Projects</a>
+      <a href="#experience" data-section="experience">Experience</a>
+      <a href="#contact" class="nav-cta" data-section="contact">Contact</a>
     </nav>
   </header>
 
-<section id="home" class="hero">
-  <video autoplay muted loop playsinline class="hero-video">
-    <source src="ferrari.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div class="video-overlay"></div>
-
-  <div class="hero-content">
-    <h1 data-text="FULL THROTTLE">
-      <span class="glitch">VANSH THACKER</span>
-    </h1>
-    <p>Computer Science Undergraduate | AI Enthusiast & Technical Developer</p>
-    <a href="#about" class="cta-btn">Lights Out & Away We Go</a>
-  </div>
-</section>
-
-  <section id="about" class="grid-section telemetry-about">
-  <div class="about-container">
-    <h2 class="section-title">ABOUT ME</h2>
-    <div class="content-wrapper">
-    <p class="about-p">
-        I am a <strong>Computer Science undergraduate at the University of Strathclyde</strong>, currently in my second year of development. I am driven by a deep enthusiasm for <strong>Artificial Intelligence</strong> and its transformative impact on the global landscape.
-      </p>
-      <p class="about-p">
-        Beyond the codebase, my experience has taught me that high-performance systems require more than just logic. I have honed my ability to <strong>collaborate in multidisciplinary teams</strong>, understanding that <strong>leadership</strong> and <strong>Agile methodologies</strong> are the fuel that drives a project from the drawing board to the finish line.
-      </p>
+  <!-- Lap telemetry HUD -->
+  <aside class="hud" aria-hidden="true">
+    <div class="hud-row">
+      <span class="hud-label">Sector</span>
+      <span class="hud-value" id="hud-sector">GRID</span>
     </div>
-    <div class="red-accent-bar"></div>
-  </div>
-  </section>
-  <section id="projects" class="grid-section">
-    <h2 class="section-title">PROJECTS</h2>
-    <div class="card">
-    <h3>CAREER PREDICTOR APP</h3>
-    <p>Predicts career paths based on user input using data-driven insights.</p>
-  
-    <div class="project-badges">
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> Python</span>
-    <span class="badge"><i class="fa-solid fa-database"></i> SQL</span>
-    <span class="badge"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+    <div class="hud-row">
+      <span class="hud-label">Speed</span>
+      <span class="hud-value"><span id="hud-speed">0</span><small> km/h</small></span>
     </div>
-
-  <a href="projects/career-predictor.html" class="cta-btn project-btn">View Full Specs</a>
-</div>
-      <div class="card">
-        <h3>Portfolio Website</h3>
-        <p>Portfolio Website based on an F1 theme</p>
-         <div class="project-badges">
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> HTML</span>
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> CSS</span>
-    <span class="badge"><i class="fa-solid fa-code-branch"></i> JavaScript</span>
+    <div class="hud-lap">
+      <div class="hud-lap-fill" id="hud-lap"></div>
     </div>
-    <a href="projects/portfolio-project.html" class="cta-btn project-btn">View Full Specs</a>
-    
-      </div>
-      
-    </div>
-  </section>
-  
-  
-<section id="experience" class="grid-section experience-track-container">
-    <h2 class="section-title">CAREER CIRCUIT</h2>
-    
-    <div class="track-wrapper">
-      <svg class="track-svg" viewBox="0 -50 1500 400" preserveAspectRatio="xMidYMid meet">
-    <path id="race-path" d="M0,200 C150,200 300,50 450,200 S750,350 900,200 S1200,50 1500,200" 
-          fill="none" stroke="#333" stroke-width="12" stroke-linecap="round" />
-    
-    <g id="car-marker">
-        <rect x="-20" y="-7" width="40" height="14" rx="3" fill="var(--f1-red)" />
-        <rect x="-22" y="-8" width="5" height="16" fill="#000" /> <circle cx="-12" cy="-9" r="4" fill="#222" />
-        <circle cx="-12" cy="9" r="4" fill="#222" />
-        <circle cx="12" cy="-9" r="4" fill="#222" />
-        <circle cx="12" cy="9" r="4" fill="#222" />
-    </g>
-    </svg>
+  </aside>
 
-        <div class="track-milestones">
-            <div class="milestone" style="left: 15%; top: 40%;">
-                <div class="milestone-content">
-                    <h3>CAMPUS AMBASSADOR: JAN 2026-PRESENT</h3>
-                    <p>Representing the university to promote higher education</p>
-                </div>
-            </div>
-            
-            
-            <div class="milestone" style="left: 50%; top: 55%;">
-                <div class="milestone-content">
-                    <h3>REGISTRATION AND WELCOME GUIDE: SEP 2025 - OCTOBER 2025</h3>
-                    <p>Helped students with their registration process at uni</p>
-                </div>
-            </div>
-
-            <div class="milestone" style="left: 85%; top: 25%;">
-                <div class="milestone-content">
-                    <h3>OPEN DAY HELPER : SEP 2025 - OCTOBER 2025</h3>
-                    <p>Helped university to organize a successful open day for prospective students.</p>
-                </div>
-
-      
-            
-                
-            </div>
-        </div>
-    </div>
-</section>
-
-  <section id="contact" class="contact-footer">
-  <div class="contact-container">
-    <h2 class="section-title">GET IN TOUCH</h2>
-    <p class="contact-description">Ready to upgrade your team's aerodynamics?</p>
-
-    <div class="contact-columns">
-      <div class="contact-item">
-        <h3 class="contact-label">ADDRESS</h3>
-        <p>Glasgow,<br>Scotland, United Kingdom</p>
-      </div>
-
-      <div class="contact-item">
-        <h3 class="contact-label">SOCIAL</h3>
-        <div class="social-links">
-          <a href="https://github.com/KILLSWITCHER07" target="_blank" aria-label="GitHub">
-            <i class="fa-brands fa-github"></i>
-          </a>
-          <a href="https://www.linkedin.com/in/vansh-thacker/" target="_blank" aria-label="LinkedIn">
-            <i class="fa-brands fa-linkedin-in"></i>
-          </a>
+  <main>
+    <section id="home" class="hero section" data-frame="-1.5">
+      <div class="hero-inner">
+        <p class="eyebrow mono"><span class="dot"></span> Computer Science · University of Strathclyde</p>
+        <h1 class="hero-title">
+          <span>Vansh</span>
+          <span class="accent">Thacker</span>
+        </h1>
+        <p class="hero-lead">
+          Computer Science undergraduate and AI enthusiast, building technical projects with the
+          precision and pace of a race team.
+        </p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">View projects</a>
+          <a href="#contact" class="btn btn-ghost">Get in touch</a>
         </div>
       </div>
+      <a href="#about" class="scroll-cue mono" aria-label="Scroll to About">
+        <span>Scroll to start the lap</span>
+        <i></i>
+      </a>
+    </section>
 
-      <div class="contact-item">
-        <h3 class="contact-label">EMAIL</h3>
-        <a href="mailto:vansh.thacker06@gmail.com" class="email-address">vansh.thacker06@gmail.com</a>
+    <section id="about" class="section section-right" data-frame="1" data-sector="S1 · ABOUT">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Sector 01</p>
+        <h2 class="section-title">About me</h2>
+        <p>
+          I am a <strong>Computer Science undergraduate at the University of Strathclyde</strong>, currently in
+          my second year. I am driven by a deep enthusiasm for <strong>Artificial Intelligence</strong> and its
+          transformative impact on the world.
+        </p>
+        <p>
+          Beyond the codebase, my experience has taught me that high-performance systems need more than logic.
+          I have built my ability to <strong>collaborate in multidisciplinary teams</strong>, and I understand that
+          <strong>leadership</strong> and <strong>Agile methods</strong> are what drive a project from the
+          drawing board to the finish line.
+        </p>
+        <dl class="facts">
+          <div><dt>Based in</dt><dd>Glasgow, UK</dd></div>
+          <div><dt>Studying</dt><dd>BSc Computer Science</dd></div>
+          <div><dt>Focus</dt><dd>Artificial Intelligence</dd></div>
+          <div><dt>Ways of working</dt><dd>Agile, team-first</dd></div>
+        </dl>
       </div>
-    </div>
-  </div>
+    </section>
 
+    <section id="projects" class="section section-left" data-frame="-1" data-sector="S2 · PROJECTS">
+      <div class="section-head reveal">
+        <p class="section-kicker mono">Sector 02</p>
+        <h2 class="section-title">Projects</h2>
+      </div>
+      <div class="cards">
+        <article class="card tilt reveal">
+          <div class="card-glare"></div>
+          <p class="card-index mono">P1</p>
+          <h3>Career Predictor App</h3>
+          <p>Predicts career paths from user input, using data-driven insights stored and queried with SQL.</p>
+          <ul class="tags">
+            <li>Python</li><li>SQL</li><li>Analytics</li>
+          </ul>
+          <a href="projects/career-predictor.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="card tilt reveal">
+          <div class="card-glare"></div>
+          <p class="card-index mono">P2</p>
+          <h3>3D F1 Portfolio</h3>
+          <p>This site: an F1-themed portfolio rendered in real time with Three.js, where scrolling drives the car around a lap.</p>
+          <ul class="tags">
+            <li>Three.js</li><li>JavaScript</li><li>HTML/CSS</li>
+          </ul>
+          <a href="projects/portfolio-project.html" class="card-link">View full specs <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
 
-  <footer>
-    <p>&copy; 2026 Vansh Portfolio.</p>
+    <section id="experience" class="section section-right" data-frame="1" data-sector="S3 · EXPERIENCE">
+      <div class="panel reveal">
+        <p class="section-kicker mono">Sector 03</p>
+        <h2 class="section-title">Career circuit</h2>
+        <ol class="timing-board">
+          <li>
+            <span class="pos mono">01</span>
+            <div class="entry">
+              <h3>Campus Ambassador</h3>
+              <p>Representing the university to promote higher education.</p>
+            </div>
+            <span class="time mono">Jan 2026 – Present</span>
+          </li>
+          <li>
+            <span class="pos mono">02</span>
+            <div class="entry">
+              <h3>Registration and Welcome Guide</h3>
+              <p>Helped students through their registration process at university.</p>
+            </div>
+            <span class="time mono">Sep 2025 – Oct 2025</span>
+          </li>
+          <li>
+            <span class="pos mono">03</span>
+            <div class="entry">
+              <h3>Open Day Helper</h3>
+              <p>Helped the university run a successful open day for prospective students.</p>
+            </div>
+            <span class="time mono">Sep 2025 – Oct 2025</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="contact" class="section section-left" data-frame="-1.5" data-sector="FINISH · CONTACT">
+      <div class="panel panel-wide reveal">
+        <p class="section-kicker mono">Chequered flag</p>
+        <h2 class="section-title">Get in touch</h2>
+        <p class="contact-lead">Open to internships, collaborations and conversations about AI.</p>
+        <div class="contact-grid">
+          <a class="contact-item" href="mailto:vansh.thacker06@gmail.com">
+            <span class="contact-label mono">Email</span>
+            <span class="contact-value">vansh.thacker06@gmail.com</span>
+          </a>
+          <a class="contact-item" href="https://www.linkedin.com/in/vansh-thacker/" target="_blank" rel="noopener">
+            <span class="contact-label mono">LinkedIn</span>
+            <span class="contact-value">in/vansh-thacker</span>
+          </a>
+          <a class="contact-item" href="https://github.com/KILLSWITCHER07" target="_blank" rel="noopener">
+            <span class="contact-label mono">GitHub</span>
+            <span class="contact-value">KILLSWITCHER07</span>
+          </a>
+          <div class="contact-item">
+            <span class="contact-label mono">Location</span>
+            <span class="contact-value">Glasgow, Scotland, UK</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Vansh Thacker</p>
+    <p class="mono">Rendered in real time with Three.js</p>
   </footer>
 
   <script type="module" src="main.js"></script>

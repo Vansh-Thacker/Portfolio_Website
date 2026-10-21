@@ -3,73 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Briefing | Career Predictor</title>
+    <title>Career Predictor | Vansh Thacker</title>
+    <meta name="theme-color" content="#0b0b10">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="project-page">
 
-    <header>
-        <div class="logo">/PROJECT<span> DESCRITPTION</span></div>
-        <nav>
-            <ul>
-                <li><a href="../index.html#projects">← Return to Paddock</a></li>
-            </ul>
+    <header class="site-header">
+        <a href="../index.html" class="brand" aria-label="Vansh Thacker, home">
+            <span class="brand-mark">VT</span>
+            <span class="brand-name">Vansh Thacker</span>
+        </a>
+        <nav class="site-nav site-nav-static">
+            <a href="../index.html#projects">&larr; Back to projects</a>
         </nav>
     </header>
 
-    <section class="project-detail-hero">
-        <div class="hero-content">
-            <h1 class="section-title">PROJECT: CAREER PREDICTOR</h1>
-            <p class="status-tag">SYSTEM STATUS: PURPLE SECTOR</p>
-        </div>
-    </section>
+    <main>
+        <section class="project-hero">
+            <p class="section-kicker mono">Project 01</p>
+            <h1 class="hero-title">Career Predictor</h1>
+            <p class="status-tag ">Status: purple sector</p>
+        </section>
 
-    <main class="grid-section">
         <div class="project-grid">
-            <div class="project-info">
-                <div class="content-wrapper">
-                    <h3>01. PROJECT DESCRIPTION</h3>
-                    <p class="about-p">
-                        The Career Predictor App was engineered to bridge the gap between student skills and industry requirements. By utilizing a data-driven approach, the system analyzes user inputs to provide high-probability career path recommendations.
-                    </p>
+            <article class="panel">
+                <h2><span>01</span>Project description</h2>
+                <p>
+                    The Career Predictor App was built to bridge the gap between student skills and industry requirements. Using a data-driven approach, the system analyses user input to recommend the most likely career paths.
+                </p>
 
-                    <h3>02. TECHNICAL USAGE</h3>
-                    <p class="about-p">
-                        The backend utilizes <strong>Python</strong> for logic processing and <strong>SQL</strong> for managing large datasets of career parameters. The focus was to create a program that could store user answers and give them a career path.
-                    </p>
-                    <div class="repo-button-container">
-                        <a href="https://github.com/KILLSWITCHER07" target="_blank" class="cta-btn big-repo-btn">
-                        <i class="fa-brands fa-github"></i> ACCESS REPOSITORY
-                        </a>
-                    </div>
+                <h2><span>02</span>Technical usage</h2>
+                <p>
+                    The backend uses <strong>Python</strong> for the logic and <strong>SQL</strong> to manage the dataset of career parameters. The aim was a program that stores user answers and returns a matching career path.
+                </p>
+                <a href="https://github.com/KILLSWITCHER07" target="_blank" rel="noopener" class="btn btn-primary">View repository</a>
+            </article>
 
-                    
-                </div>
-            </div>
-
-            <div class="project-specs">
-                <div class="card">
-                    <h3>TECHNICAL TELEMETRY</h3>
-                    <div class="spec-list">
-                        <div class="spec-item"><span>BACKEND</span> Python </div>
-                        <div class="spec-item"><span>DATABASE:</span> MySQL </div>
-                        <div class="spec-item"><span>LIBRARIES</span> MatPlotLib </div>
-                    </div>
-                
-                </div>
-                
-
-                
-                
-            </div>
-            
+            <aside class="panel">
+                <h2>Technical telemetry</h2>
+                <ul class="spec-list">
+                    <li><span>Backend</span> Python</li>
+                    <li><span>Database</span> MySQL</li>
+                    <li><span>Libraries</span> Matplotlib</li>
+                </ul>
+            </aside>
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2026 Vansh Portfolio | Technical Documentation</p>
+    <footer class="site-footer">
+        <p>&copy; 2026 Vansh Thacker</p>
+        <p class="mono">Technical documentation</p>
     </footer>
 
 </body>
