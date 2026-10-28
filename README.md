@@ -1,33 +1,48 @@
-# Vansh Thacker — 3D F1 Portfolio
+# Vansh Thacker — Drivable F1 Portfolio
 
-A personal portfolio rendered as a real-time 3D night circuit. Each career
-milestone and project is a stop on the lap, marked by a trackside LED board.
-Scrolling drives a procedurally modelled F1 car from stop to stop, switching
-between parked three-quarter shots and a chase cam, and ends on the finish line.
+An interactive portfolio you drive. Visitors take an F1 car round a golden-hour
+circuit and drive into glowing zones to read each part of the CV: pit garages
+for work experience, marshal flags for education, projects and activities, a
+podium for the hackathon runner-up finish, and the chequered flag for contact.
+The name letters, cones and tyre stacks can be knocked around.
+
+A plain **Classic CV** view (the same page, `#cv` or `?classic`) is one click
+away for recruiters, and is what browsers without JavaScript or WebGL get.
+
+## Controls
+
+| Desktop | Phone |
+| --- | --- |
+| `W A S D` or arrow keys to drive | Steering slider and Gas/Brake pedals |
+| `Space` handbrake | Drift button |
+| `R` reset to the track, `C` camera, `M` sound | Sectors menu to jump to a zone |
+| Drag to look around | Drag to look around |
 
 ## Stack
 
-- [Three.js](https://threejs.org/) r169 (vendored in `vendor/`, no build step)
-- Plain HTML, CSS and ES modules
+- [Three.js](https://threejs.org/) r169 and [cannon-es](https://github.com/pmndrs/cannon-es) 0.20, vendored in `vendor/` (no build step)
+- Plain HTML, CSS and ES modules; engine sound synthesised with the Web Audio API
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Page content and layout |
-| `style.css` | Design system and responsive styles (shared with project pages) |
-| `main.js` | Scroll, HUD, start-lights intro, navigation, card tilt |
-| `scene.js` | Three.js scene: circuit, milestone boards, lighting, bloom and camera |
+| `index.html` | Classic CV content; each `<article>` is also a zone in the world |
+| `world.css` | HUD, panels, touch controls and the classic CV layout |
+| `main.js` | Boot, start lights, input, zone panel, minimap, sectors menu |
+| `world.js` | The 3D world: sky, circuit, pit building, zones, props, camera |
+| `drive.js` | Car handling (bicycle model with grip limit, brakes, handbrake) |
 | `car.js` | Procedural F1 car (lofted bodywork, aerofoil wings, Pirelli tyres) |
-| `assets/` | Optional `f1-car.glb` to swap in a downloaded car model |
-| `projects/` | Project detail pages |
-| `ferrari.mp4` | Fallback background when WebGL is unavailable |
+| `audio.js` | Synthesised engine, tyre squeal and impact sounds |
+| `style.css` | Styles for the project detail pages in `projects/` |
 
-## Adding a milestone
+## Adding a CV entry
 
-Add a `<section class="section stop">` to `index.html` with `data-u` (its
-position around the lap, 0 to 1), `data-cam`, `data-frame` and the board text
-in `data-num`, `data-title`, `data-sub` and `data-date`. Copy a neighbour.
+1. Add an `<article id="…">` to the classic CV in `index.html`, copying a
+   neighbour. `data-kind` is `flag`, `pit`, `podium` or `finish`; `data-num`,
+   `data-title`, `data-sub` and `data-date` are printed on its trackside board.
+2. Give it a place in `ZONE_LAYOUT` at the top of `world.js`: `u` (0 to 1
+   round the lap) and `side` (1 infield, -1 outside), or `garage` for the pit building.
 
 ## Run locally
 
